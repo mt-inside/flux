@@ -19,7 +19,7 @@ type Manifests interface {
 	FindDefinedServices(path string) (map[flux.ResourceID][]string, error)
 	// Update the definitions in a manifests bytes according to the
 	// spec given.
-	UpdateDefinition(def []byte, container string, newImageID image.Ref) ([]byte, error)
+	UpdateDefinition(def []byte, id flux.ResourceID, container string, newImageID image.Ref) ([]byte, error)
 	// Load all the resource manifests under the path given. `baseDir`
 	// is used to relativise the paths, which are supplied as absolute
 	// paths to directories or files; at least one path must be

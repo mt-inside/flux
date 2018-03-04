@@ -211,3 +211,7 @@ func policiesFrom(m Manifest) (policy.Set, error) {
 	}
 	return policies, nil
 }
+
+func multilineRE(lines ...string) *regexp.Regexp {
+	return regexp.MustCompile(`(?m:^` + strings.Join(lines, "\n") + `$)`)
+}

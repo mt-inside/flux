@@ -256,7 +256,7 @@ func (s ReleaseSpec) calculateImageUpdates(rc ReleaseContext, candidates []*Cont
 			// canonical form.
 			newImageID := currentImageID.WithNewTag(latestImage.ID.Tag)
 
-			u.ManifestBytes, err = rc.Manifests().UpdateDefinition(u.ManifestBytes, container.Name, newImageID)
+			u.ManifestBytes, err = rc.Manifests().UpdateDefinition(u.ManifestBytes, u.ResourceID, container.Name, newImageID)
 			if err != nil {
 				return nil, err
 			}
