@@ -1,9 +1,7 @@
 package kubernetes
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
 
 	"github.com/pkg/errors"
 	yaml "gopkg.in/yaml.v2"
@@ -39,8 +37,7 @@ func (m *Manifests) UpdatePolicies(in []byte, resourceID flux.ResourceID, update
 		}
 	}
 
-	args := []string{"annotate", "--namespace", ns, "--kind", kind, "--name", name}
-
+	args := []string{}
 	for pol, val := range add {
 		args = append(args, fmt.Sprintf("%s%s=%s", resource.PolicyPrefix, pol, val))
 	}
@@ -48,17 +45,7 @@ func (m *Manifests) UpdatePolicies(in []byte, resourceID flux.ResourceID, update
 		args = append(args, fmt.Sprintf("%s%s=", resource.PolicyPrefix, pol))
 	}
 
-	cmd := exec.Command("kubeyaml", args...)
-	out := &bytes.Buffer{}
-	errOut := &bytes.Buffer{}
-	cmd.Stdin = bytes.NewBuffer(in)
-	cmd.Stdout = out
-	cmd.Stderr = errOut
-	err := cmd.Run()
-	if err != nil {
-		return nil, errors.Wrap(err, errOut.String())
-	}
-	return out.Bytes(), nil
+	return (KubeYAML{}).Annotate(in, ns, kind, name, args...)
 }
 
 type containerManifest struct {
