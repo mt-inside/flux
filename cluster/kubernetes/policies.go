@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 
 	"github.com/weaveworks/flux"
 	"github.com/weaveworks/flux/cluster/kubernetes/resource"
@@ -22,7 +21,7 @@ func (m *Manifests) UpdatePolicies(in []byte, resourceID flux.ResourceID, update
 	// what all the containers are.
 	if tagAll, ok := add.Get(policy.TagAll); ok {
 		add = add.Without(policy.TagAll)
-		containers, err := parseForContainers(in)
+		containers, err := parseForContainers(resourceID, in)
 		if err != nil {
 			return nil, err
 		}
@@ -48,45 +47,21 @@ func (m *Manifests) UpdatePolicies(in []byte, resourceID flux.ResourceID, update
 	return (KubeYAML{}).Annotate(in, ns, kind, name, args...)
 }
 
-type containerManifest struct {
-	Spec struct {
-		Template struct {
-			Spec struct {
-				Containers []struct {
-					Name  string `yaml:"name"`
-					Image string `yaml:"image"`
-				} `yaml:"containers"`
-			} `yaml:"spec"`
-		} `yaml:"template"`
-		JobTemplate struct {
-			Spec struct {
-				Template struct {
-					Spec struct {
-						Containers []struct {
-							Name  string `yaml:"name"`
-							Image string `yaml:"image"`
-						} `yaml:"containers"`
-					} `yaml:"spec"`
-				} `yaml:"template"`
-			} `yaml:"spec"`
-		} `yaml:"jobTemplate"`
-	} `yaml:"spec"`
-}
-
-func parseForContainers(def []byte) ([]string, error) {
-	var m containerManifest
-	if err := yaml.Unmarshal(def, &m); err != nil {
-		return nil, errors.Wrap(err, "decoding manifest")
+func parseForContainers(id flux.ResourceID, def []byte) ([]string, error) {
+	all, err := resource.ParseMultidoc(def, "stdin")
+	if err != nil {
+		return nil, err
+	}
+	res, ok := all[id.String()]
+	if !ok {
+		return nil, errors.New("resource " + id.String() + " not found")
+	}
+	workload, ok := res.(resource.Workload)
+	if !ok {
+		return nil, errors.New("resource " + id.String() + " does not have containers")
 	}
 
-	var names []string
-	for _, c := range m.Spec.Template.Spec.Containers {
-		names = append(names, c.Name)
-	}
-	for _, c := range m.Spec.JobTemplate.Spec.Template.Spec.Containers {
-		names = append(names, c.Name)
-	}
-	return names, nil
+	return workload.ContainerNames(), nil
 }
 
 func (m *Manifests) ServicesWithPolicies(root string) (policy.ResourceMap, error) {

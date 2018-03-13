@@ -15,6 +15,11 @@ const (
 	PolicyPrefix = "flux.weave.works/"
 )
 
+// Use for extracting the list of containers out of a resource.
+type Workload interface {
+	ContainerNames() []string
+}
+
 // -- unmarshaling code for specific object and field types
 
 // struct to embed in objects, to provide default implementation

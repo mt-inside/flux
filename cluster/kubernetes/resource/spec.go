@@ -13,6 +13,14 @@ type PodTemplate struct {
 	Spec     PodSpec
 }
 
+func (t PodTemplate) ContainerNames() []string {
+	var result []string
+	for _, c := range t.Spec.Containers {
+		result = append(result, c.Name)
+	}
+	return result
+}
+
 type PodSpec struct {
 	ImagePullSecrets []struct{ Name string }
 	Volumes          []Volume

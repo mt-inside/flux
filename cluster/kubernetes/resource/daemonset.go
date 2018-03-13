@@ -8,3 +8,7 @@ type DaemonSet struct {
 type DaemonSetSpec struct {
 	Template PodTemplate
 }
+
+func (ds DaemonSet) ContainerNames() []string {
+	return ds.Spec.Template.ContainerNames()
+}
