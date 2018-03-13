@@ -3,7 +3,6 @@ package kubernetes
 import (
 	"bytes"
 	"errors"
-	"os"
 	"os/exec"
 	"strings"
 )
@@ -28,18 +27,14 @@ func (k KubeYAML) Annotate(in []byte, ns, kind, name string, policies ...string)
 }
 
 func execKubeyaml(in []byte, args []string) ([]byte, error) {
-	kubeyaml, err := exec.LookPath("kubeyaml")
-	if err != nil {
-		kubeyaml = os.ExpandEnv("${PLUGINS_PATH}/kubeyaml/kubeyaml")
-	}
-	cmd := exec.Command(kubeyaml, args...)
+	cmd := exec.Command("kubeyaml", args...)
 	out := &bytes.Buffer{}
 	errOut := &bytes.Buffer{}
 	cmd.Stdin = bytes.NewBuffer(in)
 	cmd.Stdout = out
 	cmd.Stderr = errOut
 
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		return nil, errors.New(strings.TrimSpace(errOut.String()))
 	}
