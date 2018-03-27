@@ -1,4 +1,4 @@
-package git
+package daemon
 
 import (
 	"github.com/weaveworks/flux/job"
