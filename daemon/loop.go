@@ -280,7 +280,7 @@ func (d *Daemon) doSync(logger log.Logger) (retErr error) {
 				continue
 			}
 			ctx, cancel := context.WithTimeout(ctx, gitOpTimeout)
-			var n Note
+			var n note
 			ok, err := working.GetNote(ctx, commits[i].Revision, &n)
 			cancel()
 			if err != nil {

@@ -136,8 +136,7 @@ func addNote(ctx context.Context, workingDir, rev, notesRef string, note interfa
 	return execGitCmd(ctx, workingDir, nil, "notes", "--ref", notesRef, "add", "-m", string(b), rev)
 }
 
-// NB first return value indicates whether there was a note; second was an error
-func getNote(ctx context.Context, workingDir, notesRef, rev string, note interface{}) (bool, error) {
+func getNote(ctx context.Context, workingDir, notesRef, rev string, note interface{}) (ok bool, err error) {
 	out := &bytes.Buffer{}
 	if err := execGitCmd(ctx, workingDir, out, "notes", "--ref", notesRef, "show", rev); err != nil {
 		if strings.Contains(strings.ToLower(err.Error()), "no note found for object") {
